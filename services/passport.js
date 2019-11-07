@@ -42,23 +42,12 @@ passport.use(new googleStrategy(
         callbackURL:'/auth/google/callback',
         proxy: true
     },
-    (accessToken, refreshToken, profile, done) => {
-            User.findOne({ googleId: profile.id })
-            .then((existingUser)=>{
+    async (accessToken, refreshToken, profile, done) => {
+          existingUser =  await User.findOne({ googleId: profile.id })
                 if (existingUser) {
-                      //user exists
-                     
-                      done(null, existingUser)
-                }else{
-                    //user not exist
-                   
-                    new User({ googleId :profile.id })
-                      .save()
-                      .then(user => done(null, user))
-                      .catch(e => console.log('Error', e))
+                     return done(null, existingUser)
                 }
-            }).catch(e => console.log('Error', e))
-        
+                   const user = await new User({ googleId :profile.id }).save()
+                   done(null, user) 
         }
-    
 ));
